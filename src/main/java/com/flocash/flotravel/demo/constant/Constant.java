@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class Constant {
     public static final String SUCCESS_CODE = "200";
     public static final String NO_RESULT_CODE = "400";
+    public static final String LIVE_ENV = "live";
+
 
     public static final String SHOPPING_PACKAGE_SUCCESS = "Get Shopping Package Success";
     public static final String NO_RESULT_MASSAGE = "There is no result for this request";

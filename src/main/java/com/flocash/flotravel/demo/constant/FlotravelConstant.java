@@ -13,4 +13,5 @@ public class FlotravelConstant {
     public static final String FLOTRAVEL_LIVE_DOMAIN = "https://flotravel.flocash.com";
 
     public static final String PACKAGE_SHOPPING_URL = "/api/packages/shopping";
+    public static final String PACKAGE_HOTEL_ROOM_URL = "/api/packages/hotelRoom";
 }

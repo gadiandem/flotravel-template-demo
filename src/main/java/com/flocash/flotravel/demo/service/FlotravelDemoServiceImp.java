@@ -1,15 +1,15 @@
 package com.flocash.flotravel.demo.service;
 
 
-import com.flocash.flotravel.demo.dto.common.packages.consumer.PackageShoppingReq;
-import com.flocash.flotravel.demo.dto.common.packages.consumer.PackageShoppingItem;
-import com.flocash.flotravel.demo.dto.common.packages.consumer.PackageShoppingRes;
+import com.flocash.flotravel.demo.dto.common.packages.consumer.*;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +19,9 @@ import static com.flocash.flotravel.demo.constant.FlotravelConstant.*;
 @Service
 @Slf4j
 public class FlotravelDemoServiceImp implements FlotravelDemoService {
+    @Value("${env}")
+    private String env;
+    private String domainUrl;
     private WebclientService webclientService;
 
     @Autowired
@@ -26,10 +29,18 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
         this.webclientService = webclientService;
     }
 
+    @PostConstruct
+    public void selectDomainUrl() {
+        if (LIVE_ENV.equalsIgnoreCase(env)) {
+            domainUrl = FLOTRAVEL_LIVE_DOMAIN;
+        } else {
+            domainUrl = FLOTRAVEL_TEST_DOMAIN;
+        }
+    }
 
     @Override
     public PackageShoppingRes shoppingPackage(PackageShoppingReq req) {
-        List<PackageShoppingItem> res = webclientService.retRequestWithEndpoint(FLOTRAVEL_LIVE_DOMAIN + PACKAGE_SHOPPING_URL)
+        List<PackageShoppingItem> res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_SHOPPING_URL)
                 .post()
                 .body(Mono.just(req), PackageShoppingReq.class)
                 .retrieve()
@@ -50,5 +61,30 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
             packageShoppingRes.setMessage(NO_RESULT_MASSAGE);
         }
         return packageShoppingRes;
+    }
+
+    @Override
+    public HotelRoomDetailRes getPackageHotelDetail(HotelRoomDetailReq req) {
+        List<HotelRoomDetailItem> res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_HOTEL_ROOM_URL)
+                .post()
+                .body(Mono.just(req), PackageShoppingReq.class)
+                .retrieve()
+                .bodyToFlux(HotelRoomDetailItem.class)
+                .collectList().block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res.size());
+        log.info("Shopping Package: " + listResult + " item");
+        HotelRoomDetailRes hotelRoomDetailRes = new HotelRoomDetailRes();
+        if(res.size() > 0){
+            hotelRoomDetailRes.setResult(res);
+            hotelRoomDetailRes.setCode(SUCCESS_CODE);
+            hotelRoomDetailRes.setMessage(SHOPPING_PACKAGE_SUCCESS);
+        } else {
+            hotelRoomDetailRes.setResult(Collections.emptyList());
+            hotelRoomDetailRes.setResult(res);
+            hotelRoomDetailRes.setCode(NO_RESULT_CODE);
+            hotelRoomDetailRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return hotelRoomDetailRes;
     }
 }

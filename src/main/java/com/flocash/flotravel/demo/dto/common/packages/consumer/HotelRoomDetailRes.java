@@ -1,20 +1,15 @@
 package com.flocash.flotravel.demo.dto.common.packages.consumer;
 
+import com.flocash.flotravel.demo.dto.common.BaseResponse;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
-public class HotelRoomDetailRes {
-    private String id;
-    private String hotelId;
-    private String roomType;
-    private String roomDescription;
-    private String customerInformationPack;
-    private int adultCount;
-    private int childCount;
-    private BigDecimal pricePerNight;
-    private String currency;
-    private double discount;
-    private boolean breakfast;
+@AllArgsConstructor
+@NoArgsConstructor
+public class HotelRoomDetailRes extends BaseResponse {
+    List<HotelRoomDetailItem> result;
 }

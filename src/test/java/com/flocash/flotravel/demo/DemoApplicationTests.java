@@ -1,5 +1,7 @@
 package com.flocash.flotravel.demo;
 
+import com.flocash.flotravel.demo.dto.common.packages.consumer.HotelRoomDetailReq;
+import com.flocash.flotravel.demo.dto.common.packages.consumer.HotelRoomDetailRes;
 import com.flocash.flotravel.demo.dto.common.packages.consumer.PackageShoppingReq;
 import com.flocash.flotravel.demo.dto.common.packages.consumer.PackageShoppingRes;
 import com.flocash.flotravel.demo.service.FlotravelDemoService;
@@ -33,6 +35,15 @@ class DemoApplicationTests {
 		packageShoppingReq.setMaxDay(1);
 		packageShoppingReq.setCityCode("6053839");
 		PackageShoppingRes packageShoppingRes = flotravelDemoService.shoppingPackage(packageShoppingReq);
+		assertThat(packageShoppingRes.getCode()).isEqualTo("200");
+	}
+
+	@Test
+	void testGetPackageHotelDetail() {
+		String hotelId = "60fe4877b6ee7c668d8b1589";
+		HotelRoomDetailReq req = new HotelRoomDetailReq();
+		req.setHotelId(hotelId);
+		HotelRoomDetailRes packageShoppingRes = flotravelDemoService.getPackageHotelDetail(req);
 		assertThat(packageShoppingRes.getCode()).isEqualTo("200");
 	}
 }
