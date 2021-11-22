@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthBasic {
-    private String userName;
-    private String password;
+public class BaseResponse {
+    private String code;
+    private String message;
 }

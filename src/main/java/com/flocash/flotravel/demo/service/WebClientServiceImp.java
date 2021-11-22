@@ -17,10 +17,12 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
+import static com.flocash.flotravel.demo.constant.FlotravelConstant.FLOTRAVEL_TEST_DOMAIN;
+
 @Service
 @Slf4j
 public class WebClientServiceImp implements WebclientService {
-    private final int timeout = 5000;
+    private final int timeout = 50000;
     private HttpClient httpClient;
 
     @PostConstruct
@@ -37,7 +39,7 @@ public class WebClientServiceImp implements WebclientService {
     public WebClient requestDefault() {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl("https://flotravel-test.flocash.com")
+                .baseUrl(FLOTRAVEL_TEST_DOMAIN)
                 .build();
     }
 
