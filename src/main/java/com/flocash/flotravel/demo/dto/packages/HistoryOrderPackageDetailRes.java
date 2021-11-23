@@ -1,38 +1,37 @@
-package com.flocash.flotravel.demo.dto.common.packages.consumer;
+package com.flocash.flotravel.demo.dto.packages;
 
-//import com.flocash.flotravel.dto.CustomerBookingInfo;
-//import com.flocash.flotravel.dto.flocash.response.PayOption;
-//import com.flocash.flotravel.dto.flocash.response.Payer;
-//import com.flocash.flotravel.dto.flocash.response.Redirect;
+
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class OrderPackageRes {
+public class HistoryOrderPackageDetailRes {
     private String id;
     private String accountBooking;
     private boolean bookingForUser;
     private String userIsBooking;
     private String name;
     private String title;
-    //    private Payer payer;
-    private String packageId;
-    private String packageAvailabilityId;
-    private String hotelId;
-    private int numberOfRoom;
-    private List<String> roomIds;
-    private String supplementId;
-    private String tourId;
-    private String transferId;
-    private BigDecimal totalPrice;
-    private BigDecimal tax;
+//    private PackageInfo packageInfo;
+//
+//    private HotelPackage hotelPackage;
+//    private int numberOfRoom;
+//    private List<HotelRoom> rooms;
+//    private List<Supplement> supplements;
+//    private List<TourInPackage> tourInPackages;
+//    private List<TransferInPackage> transferInPackages;
+//    private BigDecimal totalPrice;
+//    private PackageTax packageTax;
     private String emailToNCT;
 
     private String bookingStatus;
 //    private List<CustomerBookingInfo> customerBookingInfos;
 
+    private LocalDateTime createDate;
+    private String startDate;
     // flocash data
     private BigDecimal amount;
     private BigDecimal capturedAmount;
@@ -52,9 +51,7 @@ public class OrderPackageRes {
     private String statusDesc;
     private String paymentChannel;
 //    private Payer payer;
-//    private String bookingStatusDes;
 //    private PayOption payOption;
 //    private String approveCode;
 //    private Redirect redirect;
-
 }

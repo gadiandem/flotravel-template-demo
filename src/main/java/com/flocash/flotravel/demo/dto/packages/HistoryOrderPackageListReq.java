@@ -1,4 +1,4 @@
-package com.flocash.flotravel.demo.dto.common.packages.consumer;
+package com.flocash.flotravel.demo.dto.packages;
 
 import lombok.Data;
 

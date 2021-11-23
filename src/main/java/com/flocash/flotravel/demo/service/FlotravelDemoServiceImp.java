@@ -1,7 +1,7 @@
 package com.flocash.flotravel.demo.service;
 
 
-import com.flocash.flotravel.demo.dto.common.packages.consumer.*;
+import com.flocash.flotravel.demo.dto.packages.*;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +86,34 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
             hotelRoomDetailRes.setMessage(NO_RESULT_MASSAGE);
         }
         return hotelRoomDetailRes;
+    }
+
+    @Override
+    public OptionalRes getOptionalList(OptionalReq req) {
+        OptionalList res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_OPTIONAL_URL)
+                .post()
+                .body(Mono.just(req), PackageShoppingReq.class)
+                .retrieve()
+                .bodyToMono(OptionalList.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("Optional res: " + listResult);
+        OptionalRes optionalRes = new OptionalRes();
+        if(res != null){
+            optionalRes.setResult(res);
+            optionalRes.setCode(SUCCESS_CODE);
+            optionalRes.setMessage(SHOPPING_PACKAGE_SUCCESS);
+        } else {
+            optionalRes.setResult(null);
+            optionalRes.setCode(NO_RESULT_CODE);
+            optionalRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return optionalRes;
+    }
+
+    @Override
+    public SummaryPackageRes getSummary(SummaryPackageReq req) {
+        return null;
     }
 }
