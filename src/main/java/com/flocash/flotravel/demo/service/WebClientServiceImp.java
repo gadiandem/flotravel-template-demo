@@ -21,7 +21,7 @@ import static com.flocash.flotravel.demo.constant.FlotravelConstant.FLOTRAVEL_TE
 
 @Service
 @Slf4j
-public class WebClientServiceImp implements WebclientService {
+public class WebClientServiceImp implements WebClientService {
     private final int timeout = 50000;
     private HttpClient httpClient;
 
