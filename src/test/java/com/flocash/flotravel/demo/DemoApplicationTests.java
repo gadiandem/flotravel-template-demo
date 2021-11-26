@@ -4,6 +4,7 @@ import com.flocash.flotravel.demo.dto.packages.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 import com.flocash.flotravel.demo.service.FlotravelDemoService;
 import com.flocash.flotravel.demo.service.WebClientService;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ class DemoApplicationTests {
 
 	@Test
 	void testDestinationElasticSearch() {
-		String keyword = "new york";
+		String keyword = "dubai";
 		DestinationRes destinationRes = flotravelDemoService.destinationElasticSearch(keyword);
 		assertThat(destinationRes.getCode()).isEqualTo(SUCCESS_CODE);
 	}
@@ -73,5 +74,33 @@ class DemoApplicationTests {
 		req.setPackageId(packageId);
 		OptionalRes optionalList = flotravelDemoService.getOptionalList(req);
 		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
+	}
+	@Test
+	void testSummaryPrice() {
+		String data = "{\n" +
+                "  \"packageInfo\": {\n" +
+                "    \"id\": \"61041ed5d57e25360762078e\",\n" +
+                "    \"count\": 1\n" +
+                "  },\n" +
+                "  \"hotelId\": \"6135cb00fa0de50d9f719da3\",\n" +
+                "  \"hotelRooms\": [\n" +
+                "    {\n" +
+                "      \"id\": \"61360912fa0de50d9f719e4f\",\n" +
+                "      \"count\": 1\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"startDate\": \"2021-11-25\",\n" +
+                "  \"supplements\": [\n" +
+                "    {\n" +
+                "      \"id\": \"6103f0a5d57e253607620789\",\n" +
+                "      \"count\": 1\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        Gson gson = new Gson();
+        SummaryPackageReq req = gson.fromJson(data, SummaryPackageReq.class);
+        SummaryPackageRes optionalList = flotravelDemoService.getSummary(req);
+//		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
+		assertThat(optionalList).isNotNull();
 	}
 }

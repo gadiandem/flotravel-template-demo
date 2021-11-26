@@ -26,7 +26,4 @@ public class PackageProviderService {
         return null;
     }
 
-//    public void getPackageInfo(){
-//
-//    }
 }
