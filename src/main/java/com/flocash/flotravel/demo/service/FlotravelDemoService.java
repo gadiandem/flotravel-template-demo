@@ -2,6 +2,8 @@ package com.flocash.flotravel.demo.service;
 
 
 import com.flocash.flotravel.demo.dto.flocash.RefundParameter;
+import com.flocash.flotravel.demo.dto.flocash.vcn.request.VcnRequest;
+import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCNRes;
 import com.flocash.flotravel.demo.dto.packages.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 
@@ -15,8 +17,10 @@ public interface FlotravelDemoService {
     HotelRoomDetailRes getPackageHotelDetail(HotelRoomDetailReq req);
     OptionalRes getOptionalList(OptionalReq req);
     SummaryPackageRes getSummary(SummaryPackageReq req);
-    OrderPackageRes createOrder(OrderPackageReq req, String environment);
-    OrderPackageRes cancelBooking(RefundParameter req);
+    FlocashVCNRes requestVcn(VcnRequest req);
+    CreateOrderPackageRes createOrder(OrderPackageReq req);
+
+    CancelOrderPackageRes cancelBooking(RefundParameter req);
 
     Map<String, List<HistoryOrderPackageListRes>> getBookingList(HistoryOrderPackageListReq req);
     HistoryOrderPackageDetailRes getBookingDetail(HistoryOrderPackageDetailReq req);

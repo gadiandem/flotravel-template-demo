@@ -17,6 +17,7 @@ public class FlocashConstant {
     public static final String CREATE_ORDER_SANDBOX_URL = FLOCASH_TEST_DOMAIN + "/rest/v2/orders";
 
     // live env
+    public static final String FLOCASH_LIVE_MERCHANT_EMAIL = "flotravel@mobirr.com";
     public static final String REQUEST_VCN_LIVE_URL = FLOCASH_LIVE_DOMAIN + "/rest/v2/vcns/byMerchant";
     public static final String CREATE_ORDER_LIVE_URL = FLOCASH_LIVE_DOMAIN + "/rest/v2/orders";
 

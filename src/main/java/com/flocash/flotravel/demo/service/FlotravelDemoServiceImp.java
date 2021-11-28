@@ -1,22 +1,14 @@
 package com.flocash.flotravel.demo.service;
 
 
-import com.flocash.flotravel.demo.dto.flocash.PaymentInfo;
 import com.flocash.flotravel.demo.dto.flocash.RefundParameter;
-import com.flocash.flotravel.demo.dto.flocash.request.FlocashRequest;
-import com.flocash.flotravel.demo.dto.flocash.response.FlocashCreateOrderRes;
-import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpRes;
-import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpResponse;
+import com.flocash.flotravel.demo.dto.flocash.vcn.request.VcnRequest;
+import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCN;
+import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCNRes;
 import com.flocash.flotravel.demo.dto.packages.*;
-import com.flocash.flotravel.demo.dto.packages.provider.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationItem;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 import com.flocash.flotravel.demo.exception.ApplicationException;
-import com.flocash.flotravel.demo.mapper.packages.SummaryPackageMapper;
-import com.flocash.flotravel.demo.service.flocash.FlocashCreditCardService;
-import com.flocash.flotravel.demo.service.flocash.FlocashVCNService;
-import com.flocash.flotravel.demo.service.provider.PackageProviderService;
-import com.flocash.flotravel.demo.service.provider.SummaryPackageCacheService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +18,6 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -34,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.flocash.flotravel.demo.constant.Constant.*;
-import static com.flocash.flotravel.demo.constant.FlocashConstant.*;
 import static com.flocash.flotravel.demo.constant.FlotravelConstant.*;
 import static com.flocash.flotravel.demo.constant.FlotravelConstant.PACKAGE_HOTEL_ROOM_URL;
 
@@ -45,41 +35,48 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     private String env;
     private String domainUrl;
     private WebClientService webclientService;
-    private PackageProviderService providerService;
-    private SummaryPackageMapper summaryPackageMapper;
-    private SummaryPackageCacheService summaryPackageCacheService;
-    private FlocashVCNService flocashVCNService;
-    private FlocashCreditCardService flocashCreditCardService;
+//    private PackageProviderService providerService;
+//    private SummaryPackageMapper summaryPackageMapper;
+//    private SummaryPackageCacheService summaryPackageCacheService;
+//    private FlocashVCNService flocashVCNService;
+//    private FlocashCreditCardService flocashCreditCardService;
+//    private ModelMapper modelMapper;
+
 
     @Autowired
     public void setWebclientService(WebClientService webclientService) {
         this.webclientService = webclientService;
     }
 
-    @Autowired
-    public void setProviderService(PackageProviderService providerService) {
-        this.providerService = providerService;
-    }
-
-    @Autowired
-    public void setSummaryPackageMapper(SummaryPackageMapper summaryPackageMapper) {
-        this.summaryPackageMapper = summaryPackageMapper;
-    }
-
-    @Autowired
-    public void setSummaryPackageCacheService(SummaryPackageCacheService summaryPackageCacheService) {
-        this.summaryPackageCacheService = summaryPackageCacheService;
-    }
-
-    @Autowired
-    public void setFlocashVCNService(FlocashVCNService flocashVCNService) {
-        this.flocashVCNService = flocashVCNService;
-    }
-
-    @Autowired
-    public void setFlocashCreditCardService(FlocashCreditCardService flocashCreditCardService) {
-        this.flocashCreditCardService = flocashCreditCardService;
-    }
+//    @Autowired
+//    public void setProviderService(PackageProviderService providerService) {
+//        this.providerService = providerService;
+//    }
+//
+//    @Autowired
+//    public void setSummaryPackageMapper(SummaryPackageMapper summaryPackageMapper) {
+//        this.summaryPackageMapper = summaryPackageMapper;
+//    }
+//
+//    @Autowired
+//    public void setSummaryPackageCacheService(SummaryPackageCacheService summaryPackageCacheService) {
+//        this.summaryPackageCacheService = summaryPackageCacheService;
+//    }
+//
+//    @Autowired
+//    public void setFlocashVCNService(FlocashVCNService flocashVCNService) {
+//        this.flocashVCNService = flocashVCNService;
+//    }
+//
+//    @Autowired
+//    public void setFlocashCreditCardService(FlocashCreditCardService flocashCreditCardService) {
+//        this.flocashCreditCardService = flocashCreditCardService;
+//    }
+//
+//    @Autowired
+//    public void setModelMapper(ModelMapper modelMapper) {
+//        this.modelMapper = modelMapper;
+//    }
 
     @PostConstruct
     public void selectDomainUrl() {
@@ -225,155 +222,98 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
 
     @Override
     public SummaryPackageRes getSummary(SummaryPackageReq req) {
+        SummaryPackage res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_SUMMARY_URL)
+                .post()
+                .body(Mono.just(req), SummaryPackageReq.class)
+                .retrieve()
+                .bodyToMono(SummaryPackage.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("SummaryPackageRes res: " + listResult);
         SummaryPackageRes summaryPackageRes = new SummaryPackageRes();
-        BigDecimal totalPrice = new BigDecimal(0);
-        BigDecimal basePrice = new BigDecimal(0);
-        PackageInfo packageInfo = providerService.getPackageInfo(req.getPackageInfo().getId());
-
-        // package price
-        if (req.getPackageInfo() != null && packageInfo != null) {
-            basePrice = basePrice.add(packageInfo.getPrice());
-            basePrice = basePrice.multiply(new BigDecimal(req.getPackageInfo().getCount()));
+        if (res != null) {
+            summaryPackageRes.setResult(res);
+            summaryPackageRes.setCode(SUCCESS_CODE);
+            summaryPackageRes.setMessage(GET_OPTIONAL_SUCCESS);
+        } else {
+            summaryPackageRes.setResult(null);
+            summaryPackageRes.setCode(NO_RESULT_CODE);
+            summaryPackageRes.setMessage(NO_RESULT_MASSAGE);
         }
-
-        // supplement price
-        if (req.getSupplements() != null && req.getSupplements().size() > 0) {
-            BigDecimal supplementPrice = new BigDecimal(0);
-            List<ItemPrice> supplements = req.getSupplements();
-            for (ItemPrice itemPrice : supplements) {
-                Supplement supplement = providerService.getSupplement(itemPrice.getId());
-                if (supplement != null) {
-//                    supplementPrice = supplementPrice.add((new BigDecimal(supplement.getPrice().trim())).multiply(new BigDecimal(itemPrice.getCount())));
-                    supplementPrice = supplementPrice.add(supplement.getPrice()).multiply(new BigDecimal(itemPrice.getCount()));
-                }
-            }
-            basePrice = basePrice.add(supplementPrice);
-        }
-        // tour price
-        if (req.getTours() != null && req.getTours().size() > 0) {
-            BigDecimal tourPackagePrice = new BigDecimal(0);
-            List<ItemPrice> tours = req.getTours();
-            for (ItemPrice itemPrice : tours) {
-                TourInPackage tourPackage = providerService.getTourPackage(itemPrice.getId());
-                if (tourPackage != null) {
-                    tourPackagePrice = tourPackagePrice.add((tourPackage.getPrice().multiply(new BigDecimal(itemPrice.getCount()))));
-                }
-            }
-            basePrice = basePrice.add(tourPackagePrice);
-        }
-        // transfer price
-        if (req.getTransfers() != null && req.getTransfers().size() > 0) {
-            BigDecimal transferPackagePrice = new BigDecimal(0);
-            List<ItemPrice> transfers = req.getTransfers();
-            for (ItemPrice itemPrice : transfers) {
-                TransferInPackage transfer = providerService.getTransfer(itemPrice.getId());
-                if (transfer != null) {
-                    transferPackagePrice = transferPackagePrice.add(transfer.getAmount().multiply(new BigDecimal(itemPrice.getCount())));
-                }
-            }
-            basePrice = basePrice.add(transferPackagePrice);
-        }
-        // base price
-        summaryPackageRes.setBasePrice(basePrice);
-
-        totalPrice = totalPrice.add(basePrice);
-        summaryPackageRes.setTotalPrice(totalPrice);
-        summaryPackageRes.setAvailable(true);
-        summaryPackageRes.setStartDate(req.getStartDate());
-//        summaryPackageRes.setItemCount(req.getItemCount());
-        SummaryPackageCache summaryToSave = summaryPackageMapper.mapToSummaryPackageDomain(summaryPackageRes);
-        summaryToSave.setPackageInfo(req.getPackageInfo());
-        summaryToSave.setHotelId(req.getHotelId());
-        summaryToSave.setHotelRooms(req.getHotelRooms());
-        summaryToSave.setSupplements(req.getSupplements());
-        summaryToSave.setTours(req.getTours());
-        summaryToSave.setTransfers(req.getTransfers());
-        SummaryPackageCache summarySaved = summaryPackageCacheService.addSummaryPackage(summaryToSave);
-        summaryPackageRes.setId(summarySaved.getId());
         return summaryPackageRes;
     }
 
     @Override
-    public OrderPackageRes createOrder(OrderPackageReq req, String environment) {
-        PackageOrder p;
-        FlocashRequest flocashRequest;
-        SummaryPackageCache summaryPackageCache = summaryPackageCacheService.getSummaryPackage(req.getPackagesBookingInfo().getSummaryId());
-        boolean availableBooking = summaryPackageCache.isAvailable();
-        if (!availableBooking) {
-            throw new ApplicationException(NO_RESULT_CODE, PACKAGE_NOT_AVAILABLE_MASSAGE, 400);
-        }
-        BigDecimal totalPrice = summaryPackageCache.getTotalPrice();
-        req.getPaymentInfo().setPrice(totalPrice);
-        String merchantAccount;
-        if (LIVE_ENV.equalsIgnoreCase(env)) {
-            merchantAccount = MERCHANT_FLOTRAVEL_LIVE;
+    public FlocashVCNRes requestVcn(VcnRequest req) {
+        FlocashVCN res = webclientService.retRequestWithEndpoint(domainUrl + REQUEST_VCN_URL)
+                .post()
+                .body(Mono.just(req), VcnRequest.class)
+                .retrieve()
+                .bodyToMono(FlocashVCN.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("FlocashVCN res: " + listResult);
+        FlocashVCNRes summaryPackageRes = new FlocashVCNRes();
+        if (res != null) {
+            summaryPackageRes.setResult(res);
+            summaryPackageRes.setCode(SUCCESS_CODE);
+            summaryPackageRes.setMessage(GET_OPTIONAL_SUCCESS);
         } else {
-            merchantAccount = MERCHANT_FLOTRAVEL_SANDBOX;
+            summaryPackageRes.setResult(null);
+            summaryPackageRes.setCode(NO_RESULT_CODE);
+            summaryPackageRes.setMessage(NO_RESULT_MASSAGE);
         }
-        if (req.getPaymentInfo() != null && req.getPaymentInfo().isVcnPayment()) {
-            if (req.getPaymentInfo().getTraceNumber() == null || req.getPaymentInfo().getTraceNumber().isEmpty()) {
-                throw new ApplicationException(BAD_REQUEST, MISSING_TRACE_NUMBER, 400);
-            }
-            OtpResponse vcnCard = flocashVCNService.updateOtp(req.getPaymentInfo().getTraceNumber(), req.getPaymentInfo().getOtpValue());
-            if (vcnCard.getCode().equalsIgnoreCase(SUCCESS_CODE)) {
-                PaymentInfo paymentInfo = flocashVCNService.buildFlocashPaymentRequest(vcnCard.getResult().getCardOrder(), req.getBookingContact().getEmail());
-                flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(paymentInfo, merchantAccount);
-            } else {
-                throw new ApplicationException("400", "Update Otp error, check again Otp value");
-            }
-        } else {
-            flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(req.getPaymentInfo(), merchantAccount);
-        }
-        FlocashCreateOrderRes flocashPaymentRes = flocashCreditCardService.paymentAndBooking(flocashRequest);
-        if (flocashPaymentRes.getResult() == null) {
-            throw new ApplicationException(SERVER_ERROR, FLOCASH_PAYMENT_FAIL, 500);
-        }
-        // set price and tax of package
-//        flocashPaymentRes.setTotalPrice(totalPrice);
-//        flocashPaymentRes.setPackageTax(summaryPackageCache.getPackageTax());
-//        flocashPaymentRes.setStartDate(summaryPackageCache.getStartDate());
-//        flocashPaymentRes.setCreateDate(LocalDateTime.now());
-//        extraInfo(flocashPaymentRes, req);
-//        addBookingRequestData(flocashPaymentRes, req, summaryPackageCache);
-//
-//        p = packageOrderService.addPackageOrder(flocashPaymentRes);
-//        if (p != null) {
-//            try {
-//                awsMailService.sendEmailPackagesBooking(req.getBookingContact().getEmail(), p);
-//            } catch (Exception e) {
-//                log.error(e.getMessage());
-//            }
-//        }
-//        OrderPackageRes bookingRes = orderPackageResMapper.mapOrderPackageRes(p);
-
-//        return bookingRes;
-        return null;
+        return summaryPackageRes;
     }
 
     @Override
-    public OrderPackageRes cancelBooking(RefundParameter req) {
-//        List<HotelRoomDetailItem> res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_HOTEL_ROOM_URL)
-//                .post()
-//                .body(Mono.just(req), PackageShoppingReq.class)
-//                .retrieve()
-//                .bodyToFlux(HotelRoomDetailItem.class)
-//                .collectList().block();
-//        Gson gson = new Gson();
-//        String listResult = gson.toJson(res.size());
-//        log.info("Shopping Package: " + listResult + " item");
-//        HotelRoomDetailRes hotelRoomDetailRes = new HotelRoomDetailRes();
-//        if (res.size() > 0) {
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(SUCCESS_CODE);
-//            hotelRoomDetailRes.setMessage(PACKAGE_DETAIL_SUCCESS);
-//        } else {
-//            hotelRoomDetailRes.setResult(Collections.emptyList());
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(NO_RESULT_CODE);
-//            hotelRoomDetailRes.setMessage(NO_RESULT_MASSAGE);
-//        }
-//        return hotelRoomDetailRes;
-        return null;
+    public CreateOrderPackageRes createOrder(OrderPackageReq req) {
+        OrderPackage res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_CREATE_URL)
+                .post()
+                .body(Mono.just(req), OrderPackageReq.class)
+                .retrieve()
+                .bodyToMono(OrderPackage.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("OrderPackage res: " + listResult);
+        CreateOrderPackageRes createOrderPackageRes = new CreateOrderPackageRes();
+        if (res != null) {
+            createOrderPackageRes.setResult(res);
+            createOrderPackageRes.setCode(SUCCESS_CODE);
+            createOrderPackageRes.setMessage(GET_OPTIONAL_SUCCESS);
+        } else {
+            createOrderPackageRes.setResult(null);
+            createOrderPackageRes.setCode(NO_RESULT_CODE);
+            createOrderPackageRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return createOrderPackageRes;
+    }
+
+    @Override
+    public CancelOrderPackageRes cancelBooking(RefundParameter req) {
+        OrderPackage res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_CANCEL_URL)
+                .post()
+                .body(Mono.just(req), RefundParameter.class)
+                .retrieve()
+                .bodyToMono(OrderPackage.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("RefundParameter res: " + listResult);
+        CancelOrderPackageRes cancelOrderPackageRes = new CancelOrderPackageRes();
+        if (res != null) {
+            cancelOrderPackageRes.setResult(res);
+            cancelOrderPackageRes.setCode(SUCCESS_CODE);
+            cancelOrderPackageRes.setMessage(GET_OPTIONAL_SUCCESS);
+        } else {
+            cancelOrderPackageRes.setResult(null);
+            cancelOrderPackageRes.setCode(NO_RESULT_CODE);
+            cancelOrderPackageRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return cancelOrderPackageRes;
     }
 
     @Override
@@ -432,5 +372,4 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     public void deleteBookingRecord(String packageBookingId) {
 
     }
-
 }

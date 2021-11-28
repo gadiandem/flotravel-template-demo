@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VcnRequest {
-//    private String accountId;
+    private String accountId;
     private BigDecimal price;
     private String currency;
     private MerchantPayment merchantPayment;

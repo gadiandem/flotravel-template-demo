@@ -1,16 +1,16 @@
 package com.flocash.flotravel.demo.dto.packages;
 
-//import com.flocash.flotravel.dto.CustomerBookingInfo;
-//import com.flocash.flotravel.dto.flocash.response.PayOption;
-//import com.flocash.flotravel.dto.flocash.response.Payer;
-//import com.flocash.flotravel.dto.flocash.response.Redirect;
+import com.flocash.flotravel.demo.dto.common.CustomerBookingInfo;
+import com.flocash.flotravel.demo.dto.flocash.response.PayOption;
+import com.flocash.flotravel.demo.dto.flocash.response.Payer;
+import com.flocash.flotravel.demo.dto.flocash.response.Redirect;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-public class OrderPackageRes {
+public class OrderPackage {
     private String id;
     private String accountBooking;
     private boolean bookingForUser;
@@ -31,7 +31,7 @@ public class OrderPackageRes {
     private String emailToNCT;
 
     private String bookingStatus;
-//    private List<CustomerBookingInfo> customerBookingInfos;
+    private List<CustomerBookingInfo> customerBookingInfos;
 
     // flocash data
     private BigDecimal amount;
@@ -51,10 +51,10 @@ public class OrderPackageRes {
     private String status;
     private String statusDesc;
     private String paymentChannel;
-//    private Payer payer;
-//    private String bookingStatusDes;
-//    private PayOption payOption;
-//    private String approveCode;
-//    private Redirect redirect;
+    private Payer payer;
+    private String bookingStatusDes;
+    private PayOption payOption;
+    private String approveCode;
+    private Redirect redirect;
 
 }
