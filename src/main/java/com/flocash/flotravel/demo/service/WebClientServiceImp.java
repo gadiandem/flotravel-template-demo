@@ -7,10 +7,12 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -22,7 +24,7 @@ import static com.flocash.flotravel.demo.constant.FlotravelConstant.FLOTRAVEL_TE
 @Service
 @Slf4j
 public class WebClientServiceImp implements WebClientService {
-    private final int timeout = 50000;
+    private final int timeout = 5000;
     private HttpClient httpClient;
 
     @PostConstruct
@@ -58,6 +60,17 @@ public class WebClientServiceImp implements WebClientService {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(endpoint)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, authorization)
+                .build();
+    }
+
+    @Override
+    public WebClient requestAuthBasicFormUrlEncoded(String endpoint, AuthBasic authBasic) {
+        String authorization = basicAuth(authBasic);
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .baseUrl(endpoint)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, authorization)
                 .build();
     }

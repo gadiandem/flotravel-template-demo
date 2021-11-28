@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
+import java.util.Base64;
+
 import static com.flocash.flotravel.demo.constant.Constant.*;
 
 @Service
@@ -55,7 +57,7 @@ public class FlocashBuildRequestServiceImp implements FlocashBuildRequestService
 
     @Override
     public OtpResponse updateOpt(String endpoint, AuthBasic auth, String data) {
-        OtpRes res = webClientService.requestAuthBasic(endpoint, auth)
+        OtpRes res = webClientService.requestAuthBasicFormUrlEncoded(endpoint, auth)
                 .post()
                 .body(BodyInserters.fromFormData("otp", data))
                 .retrieve()
@@ -71,11 +73,13 @@ public class FlocashBuildRequestServiceImp implements FlocashBuildRequestService
             response.setCode(NO_RESULT_CODE);
             response.setMessage(NO_RESULT_MASSAGE);
         }
-        return null;
+        return response;
     }
 
     @Override
     public FlocashVCNRes vcnRequest(String endpoint, AuthBasic auth, FlocashVCNReq req) {
+        String authString = auth.getUserName() + ":" + auth.getPassword();
+        String BasicBase64format = Base64.getEncoder().encodeToString(authString.getBytes());
 
         FlocashVCN res = webClientService.requestAuthBasic(endpoint, auth)
                 .post()

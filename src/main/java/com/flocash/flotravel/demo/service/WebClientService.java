@@ -8,4 +8,5 @@ public interface WebClientService {
 	WebClient requestDefault();
 	WebClient retRequestWithEndpoint(String endpoint);
 	WebClient requestAuthBasic(String endpoint, AuthBasic authBasic);
+	WebClient requestAuthBasicFormUrlEncoded(String endpoint, AuthBasic authBasic);
 }

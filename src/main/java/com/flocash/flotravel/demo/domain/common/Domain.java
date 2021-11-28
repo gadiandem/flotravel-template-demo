@@ -18,7 +18,7 @@ public class Domain implements Serializable {
     @CreatedDate
     private LocalDateTime createDate;
     @LastModifiedDate
-    private LocalDateTime updateDate = LocalDateTime.now();
+    private LocalDateTime updateDate ;
     @CreatedBy
     private String createdBy;
     @LastModifiedBy

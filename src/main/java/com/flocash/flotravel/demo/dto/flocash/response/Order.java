@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class Order extends Domain {
+public class Order {
     private BigDecimal amount;
     private BigDecimal capturedAmount;
     private BigDecimal refundedAmount;

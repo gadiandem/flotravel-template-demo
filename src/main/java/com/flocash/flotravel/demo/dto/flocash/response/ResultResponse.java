@@ -1,8 +1,11 @@
 package com.flocash.flotravel.demo.dto.flocash.response;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
-public class ResultResponse implements Serializable {
+@Data
+public class ResultResponse {
     private Order order;
 
     public Order getOrder() {

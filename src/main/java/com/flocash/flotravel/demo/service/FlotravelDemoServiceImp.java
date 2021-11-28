@@ -4,13 +4,17 @@ package com.flocash.flotravel.demo.service;
 import com.flocash.flotravel.demo.dto.flocash.PaymentInfo;
 import com.flocash.flotravel.demo.dto.flocash.RefundParameter;
 import com.flocash.flotravel.demo.dto.flocash.request.FlocashRequest;
+import com.flocash.flotravel.demo.dto.flocash.response.FlocashCreateOrderRes;
 import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpRes;
+import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpResponse;
 import com.flocash.flotravel.demo.dto.packages.*;
 import com.flocash.flotravel.demo.dto.packages.provider.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationItem;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 import com.flocash.flotravel.demo.exception.ApplicationException;
 import com.flocash.flotravel.demo.mapper.packages.SummaryPackageMapper;
+import com.flocash.flotravel.demo.service.flocash.FlocashCreditCardService;
+import com.flocash.flotravel.demo.service.flocash.FlocashVCNService;
 import com.flocash.flotravel.demo.service.provider.PackageProviderService;
 import com.flocash.flotravel.demo.service.provider.SummaryPackageCacheService;
 import com.google.gson.Gson;
@@ -25,13 +29,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.flocash.flotravel.demo.constant.Constant.*;
+import static com.flocash.flotravel.demo.constant.FlocashConstant.*;
 import static com.flocash.flotravel.demo.constant.FlotravelConstant.*;
+import static com.flocash.flotravel.demo.constant.FlotravelConstant.PACKAGE_HOTEL_ROOM_URL;
 
 @Service
 @Slf4j
@@ -43,6 +48,8 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     private PackageProviderService providerService;
     private SummaryPackageMapper summaryPackageMapper;
     private SummaryPackageCacheService summaryPackageCacheService;
+    private FlocashVCNService flocashVCNService;
+    private FlocashCreditCardService flocashCreditCardService;
 
     @Autowired
     public void setWebclientService(WebClientService webclientService) {
@@ -53,13 +60,25 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     public void setProviderService(PackageProviderService providerService) {
         this.providerService = providerService;
     }
+
     @Autowired
     public void setSummaryPackageMapper(SummaryPackageMapper summaryPackageMapper) {
         this.summaryPackageMapper = summaryPackageMapper;
     }
+
     @Autowired
     public void setSummaryPackageCacheService(SummaryPackageCacheService summaryPackageCacheService) {
         this.summaryPackageCacheService = summaryPackageCacheService;
+    }
+
+    @Autowired
+    public void setFlocashVCNService(FlocashVCNService flocashVCNService) {
+        this.flocashVCNService = flocashVCNService;
+    }
+
+    @Autowired
+    public void setFlocashCreditCardService(FlocashCreditCardService flocashCreditCardService) {
+        this.flocashCreditCardService = flocashCreditCardService;
     }
 
     @PostConstruct
@@ -287,33 +306,29 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
         req.getPaymentInfo().setPrice(totalPrice);
         String merchantAccount;
         if (LIVE_ENV.equalsIgnoreCase(env)) {
-            merchantAccount = PROVIDER_WALLET_PROD;
+            merchantAccount = MERCHANT_FLOTRAVEL_LIVE;
         } else {
-            merchantAccount = PROVIDER_WALLET_SANDBOX;
+            merchantAccount = MERCHANT_FLOTRAVEL_SANDBOX;
         }
-//        if (req.getPaymentInfo() != null && req.getPaymentInfo().isVcnPayment()) {
-//            if (req.getPaymentInfo().getTraceNumber() == null || req.getPaymentInfo().getTraceNumber().isEmpty()) {
-//                throw new ApplicationException(APP_ERROR_CODE, missingTraceNumber, 400);
-//            }
-//            OtpRes vcnCard = flocashVCNService.updateOtpProvider(req.getPaymentInfo().getTraceNumber(), req.getPaymentInfo().getOtpValue(), env);
-//            PaymentInfo paymentInfo;
-//            // update agent email to payer
-//            User userBooking = authService.getUser(req.getAccountBooking());
-//            if (userBooking != null) {
-//                String payerEmail = userBooking.getEmail();
-//                paymentInfo = flocashVCNService.buildFlocashPaymentRequest(vcnCard.getCardOrder(), payerEmail);
-//            } else {
-//                paymentInfo = flocashVCNService.buildFlocashPaymentRequest(vcnCard.getCardOrder(), req.getBookingContact().getEmail());
-//            }
-//            flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(paymentInfo, merchantAccount);
-//        } else {
-//            flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(req.getPaymentInfo(), merchantAccount);
-//        }
-//        PackageOrder flocashPaymentRes = flocashCreditCardService.paymentPackagesBooking(flocashRequest);
-//        if (flocashPaymentRes == null) {
-//            throw new ApplicationException(APP_ERROR_CODE, FLOCASH_PAYMENT_FAIL, 500);
-//        }
-//        // set price and tax of package
+        if (req.getPaymentInfo() != null && req.getPaymentInfo().isVcnPayment()) {
+            if (req.getPaymentInfo().getTraceNumber() == null || req.getPaymentInfo().getTraceNumber().isEmpty()) {
+                throw new ApplicationException(BAD_REQUEST, MISSING_TRACE_NUMBER, 400);
+            }
+            OtpResponse vcnCard = flocashVCNService.updateOtp(req.getPaymentInfo().getTraceNumber(), req.getPaymentInfo().getOtpValue());
+            if (vcnCard.getCode().equalsIgnoreCase(SUCCESS_CODE)) {
+                PaymentInfo paymentInfo = flocashVCNService.buildFlocashPaymentRequest(vcnCard.getResult().getCardOrder(), req.getBookingContact().getEmail());
+                flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(paymentInfo, merchantAccount);
+            } else {
+                throw new ApplicationException("400", "Update Otp error, check again Otp value");
+            }
+        } else {
+            flocashRequest = flocashCreditCardService.buildFlocashPaymentRequest(req.getPaymentInfo(), merchantAccount);
+        }
+        FlocashCreateOrderRes flocashPaymentRes = flocashCreditCardService.paymentAndBooking(flocashRequest);
+        if (flocashPaymentRes.getResult() == null) {
+            throw new ApplicationException(SERVER_ERROR, FLOCASH_PAYMENT_FAIL, 500);
+        }
+        // set price and tax of package
 //        flocashPaymentRes.setTotalPrice(totalPrice);
 //        flocashPaymentRes.setPackageTax(summaryPackageCache.getPackageTax());
 //        flocashPaymentRes.setStartDate(summaryPackageCache.getStartDate());

@@ -50,9 +50,9 @@ class DemoApplicationTests {
 	@Test
 	void shoppingPackages() {
 		PackageShoppingReq packageShoppingReq = new PackageShoppingReq();
-		packageShoppingReq.setDate(LocalDate.of(2021, 11, 25));
-		packageShoppingReq.setMinDay(7);
-		packageShoppingReq.setMaxDay(1);
+		packageShoppingReq.setDate(LocalDate.of(2021, 12, 3));
+		packageShoppingReq.setMinDay(1);
+		packageShoppingReq.setMaxDay(7);
 		packageShoppingReq.setCityCode("6053839");
 		PackageShoppingRes packageShoppingRes = flotravelDemoService.shoppingPackage(packageShoppingReq);
 		assertThat(packageShoppingRes.getCode()).isEqualTo(SUCCESS_CODE);

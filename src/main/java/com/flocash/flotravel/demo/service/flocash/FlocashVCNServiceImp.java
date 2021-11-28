@@ -10,22 +10,24 @@ import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpCardOrder;
 import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpRes;
 import com.flocash.flotravel.demo.dto.flocash.vcn.otp.OtpResponse;
 import com.flocash.flotravel.demo.dto.flocash.vcn.request.*;
-import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCN;
 import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCNRes;
 import com.flocash.flotravel.demo.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Base64;
 
 import static com.flocash.flotravel.demo.constant.Constant.*;
-import static com.flocash.flotravel.demo.constant.FlotravelConstant.*;
+import static com.flocash.flotravel.demo.constant.FlocashConstant.*;
 
 @Slf4j
 @Service
 public class FlocashVCNServiceImp implements FlocashVCNService {
+    @Value("${payment.env}")
+    private String paymentEnv;
 
     private FlocashBuildRequestService flocashBuildRequestService;
     private OtpCacheService otpCacheService;
@@ -41,12 +43,12 @@ public class FlocashVCNServiceImp implements FlocashVCNService {
     }
 
     @Override
-    public FlocashVCN requestVCN(VcnRequest vcnRequest, String environment) {
+    public FlocashVCNRes requestVCN(VcnRequest vcnRequest) {
         AuthBasic authBasic = new AuthBasic();
 //        String auth;
         String endpoint;
         String merchantAccount;
-        if (LIVE_ENV.equalsIgnoreCase(environment)) {
+        if (LIVE_ENV.equalsIgnoreCase(paymentEnv)) {
             merchantAccount = FLOCASH_LIVE_MERCHANT_EMAIL;
             endpoint = REQUEST_VCN_LIVE_URL;
             authBasic.setUserName(API_USER_FLOCASH_LIVE);
@@ -57,63 +59,41 @@ public class FlocashVCNServiceImp implements FlocashVCNService {
             authBasic.setUserName(API_USER_FLOCASH_LIVE);
             authBasic.setPassword(API_PASS_FLOCASH_LIVE);
         }
-        FlocashVCNReq request = new FlocashVCNReq();
-        VCNOrder order = new VCNOrder();
-        order.setAmount(vcnRequest.getPrice().toString());
-        order.setCurrency(vcnRequest.getCurrency());
-        request.setOrder(order);
-        VCNMerchant merchant = new VCNMerchant();
-
-        merchant.setMerchantAccount(merchantAccount);
-        request.setMerchant(merchant);
-        VCNCardInfo cardInfo = new VCNCardInfo();
-        cardInfo.setGenerateCard(vcnRequest.getMerchantPayment().isGenerateCard());
-        request.setCardInfo(cardInfo);
-        VCNAgent agent = new VCNAgent();
-        agent.setAgentAccount(vcnRequest.getMerchantPayment().getVcnAgentAccount());
-        String apiCredential = vcnRequest.getMerchantPayment().getApiAccount() + ":" + vcnRequest.getMerchantPayment().getApiPassword();
-        String basicBase64formatAPICredential = Base64.getEncoder().encodeToString(apiCredential.getBytes());
-        agent.setToken(basicBase64formatAPICredential);
-        request.setVcnAgent(agent);
+        FlocashVCNReq request = buildFlocashVcnRequest(vcnRequest, merchantAccount);
         FlocashVCNRes response = flocashBuildRequestService.vcnRequest(endpoint, authBasic, request);
-        FlocashVCN resProcess;
-        if(response.getResult() != null){
-            resProcess = response.getResult();
-        } else {
-            throw new ApplicationException(response.getCode(), response.getMessage(), 500);
-        }
-        return resProcess;
+        return response;
     }
 
     @Override
-    public OtpRes updateOtp(String traceNumber, String otp, String environment) {
+    public OtpResponse updateOtp(String traceNumber, String otp) {
         AuthBasic authBasic = new AuthBasic();
+        OtpResponse otpResponse = new OtpResponse();
         OtpCache otpCache = otpCacheService.getOtpCard(traceNumber);
         if (otpCache != null) {
             OtpRes otpRes = new OtpRes();
             otpRes.setCardOrder(otpCache.getCardOrder());
-            return otpRes;
+            otpResponse.setResult(otpRes);
+            otpResponse.setCode("200");
+            otpResponse.setMessage("Get Otp value from cache");
+            return otpResponse;
         }
         if (otp == null) {
             throw new ApplicationException(BAD_REQUEST, "Missing otp value, Try again!", 400);
         }
         String data = "otp=" + otp;
         String endpoint;
-        String auth;
 
-        if (LIVE_ENV.equalsIgnoreCase(environment)) {
-            auth = API_USER_FLOCASH_LIVE + ":" + API_PASS_FLOCASH_LIVE;
+        if (LIVE_ENV.equalsIgnoreCase(paymentEnv)) {
             authBasic.setUserName(API_USER_FLOCASH_LIVE);
             authBasic.setPassword(API_PASS_FLOCASH_LIVE);
             endpoint = REQUEST_VCN_LIVE_URL;
         } else {
-            auth = API_USER_FLOCASH_SANDBOX + ":" + API_PASSWORD_FLOCASH_SANDBOX;
             authBasic.setUserName(API_USER_FLOCASH_SANDBOX);
             authBasic.setPassword(API_PASSWORD_FLOCASH_SANDBOX);
             endpoint = REQUEST_VCN_SANDBOX_URL;
         }
         endpoint = endpoint + "/" + traceNumber;
-        OtpResponse response = flocashBuildRequestService.updateOpt(endpoint, authBasic, data);
+        OtpResponse response = flocashBuildRequestService.updateOpt(endpoint, authBasic, otp);
         OtpRes res;
         if(response.getResult() != null){
             res = response.getResult();
@@ -123,8 +103,13 @@ public class FlocashVCNServiceImp implements FlocashVCNService {
         OtpCache card = new OtpCache();
         card.setId(traceNumber);
         card.setCardOrder(res.getCardOrder());
-        otpCacheService.saveOtpCard(card);
-        return res;
+        OtpCache otpSave = otpCacheService.saveOtpCard(card);
+        OtpRes otpRes = new OtpRes();
+        otpRes.setCardOrder(otpSave.getCardOrder());
+        otpResponse.setResult(otpRes);
+        otpResponse.setCode("200");
+        otpResponse.setMessage("Otp save success");
+        return otpResponse;
     }
 
     @Override
@@ -151,5 +136,28 @@ public class FlocashVCNServiceImp implements FlocashVCNService {
         payer.setMobile(card.getCard().getBillingAddress().getPhoneNo());
         paymentInfo.setPayer(payer);
         return paymentInfo;
+    }
+
+    @Override
+    public FlocashVCNReq buildFlocashVcnRequest(VcnRequest vcnRequest, String merchantAccount) {
+        FlocashVCNReq request = new FlocashVCNReq();
+        VCNOrder order = new VCNOrder();
+        order.setAmount(vcnRequest.getPrice().toString());
+        order.setCurrency(vcnRequest.getCurrency());
+        request.setOrder(order);
+        VCNMerchant merchant = new VCNMerchant();
+
+        merchant.setMerchantAccount(merchantAccount);
+        request.setMerchant(merchant);
+        VCNCardInfo cardInfo = new VCNCardInfo();
+        cardInfo.setGenerateCard(vcnRequest.getMerchantPayment().isGenerateCard());
+        request.setCardInfo(cardInfo);
+        VCNAgent agent = new VCNAgent();
+        agent.setAgentAccount(vcnRequest.getMerchantPayment().getVcnAgentAccount());
+        String apiCredential = vcnRequest.getMerchantPayment().getApiAccount() + ":" + vcnRequest.getMerchantPayment().getApiPassword();
+        String basicBase64formatAPICredential = Base64.getEncoder().encodeToString(apiCredential.getBytes());
+        agent.setToken(basicBase64formatAPICredential);
+        request.setVcnAgent(agent);
+        return request;
     }
 }

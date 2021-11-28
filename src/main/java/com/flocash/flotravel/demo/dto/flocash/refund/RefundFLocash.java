@@ -1,15 +1,14 @@
-package com.flocash.flotravel.demo.dto.packages;
+package com.flocash.flotravel.demo.dto.flocash.refund;
 
 import com.flocash.flotravel.demo.dto.common.BaseResponse;
+import com.flocash.flotravel.demo.dto.flocash.response.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PackageShoppingRes extends BaseResponse {
-    private List<PackageShoppingItem> result;
+public class RefundFLocash extends BaseResponse {
+    private Order result;
 }
