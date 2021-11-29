@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.flocash.flotravel.demo.constant.Constant.*;
 import static com.flocash.flotravel.demo.constant.FlotravelConstant.*;
@@ -317,55 +316,49 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     }
 
     @Override
-    public Map<String, List<HistoryOrderPackageListRes>> getBookingList(HistoryOrderPackageListReq req) {
-//        List<HotelRoomDetailItem> res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_HOTEL_ROOM_URL)
-//                .post()
-//                .body(Mono.just(req), PackageShoppingReq.class)
-//                .retrieve()
-//                .bodyToFlux(HotelRoomDetailItem.class)
-//                .collectList().block();
-//        Gson gson = new Gson();
-//        String listResult = gson.toJson(res.size());
-//        log.info("Shopping Package: " + listResult + " item");
-//        HotelRoomDetailRes hotelRoomDetailRes = new HotelRoomDetailRes();
-//        if (res.size() > 0) {
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(SUCCESS_CODE);
-//            hotelRoomDetailRes.setMessage(PACKAGE_DETAIL_SUCCESS);
-//        } else {
-//            hotelRoomDetailRes.setResult(Collections.emptyList());
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(NO_RESULT_CODE);
-//            hotelRoomDetailRes.setMessage(NO_RESULT_MASSAGE);
-//        }
-//        return hotelRoomDetailRes;
-        return null;
+    public HistoryOrderPackageListRes getBookingHistoryList(HistoryOrderPackageListReq req) {
+        HistoryOrderPackageList res = webclientService.retRequestWithEndpoint(domainUrl + BOOKING_LIST_URL)
+                .post()
+                .body(Mono.just(req), HistoryOrderPackageListReq.class)
+                .retrieve()
+                .bodyToMono(HistoryOrderPackageList.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("HistoryOrderPackageListRes: " + listResult);
+        HistoryOrderPackageListRes historyOrderPackageListRes = new HistoryOrderPackageListRes();
+        if (res != null) {
+            historyOrderPackageListRes.setResult(res);
+            historyOrderPackageListRes.setCode(SUCCESS_CODE);
+            historyOrderPackageListRes.setMessage(PACKAGE_DETAIL_SUCCESS);
+        } else {
+            historyOrderPackageListRes.setCode(NO_RESULT_CODE);
+            historyOrderPackageListRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return historyOrderPackageListRes;
     }
 
     @Override
-    public HistoryOrderPackageDetailRes getBookingDetail(HistoryOrderPackageDetailReq req) {
-//        List<HotelRoomDetailItem> res = webclientService.retRequestWithEndpoint(domainUrl + PACKAGE_HOTEL_ROOM_URL)
-//                .post()
-//                .body(Mono.just(req), PackageShoppingReq.class)
-//                .retrieve()
-//                .bodyToFlux(HotelRoomDetailItem.class)
-//                .collectList().block();
-//        Gson gson = new Gson();
-//        String listResult = gson.toJson(res.size());
-//        log.info("Shopping Package: " + listResult + " item");
-//        HotelRoomDetailRes hotelRoomDetailRes = new HotelRoomDetailRes();
-//        if (res.size() > 0) {
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(SUCCESS_CODE);
-//            hotelRoomDetailRes.setMessage(PACKAGE_DETAIL_SUCCESS);
-//        } else {
-//            hotelRoomDetailRes.setResult(Collections.emptyList());
-//            hotelRoomDetailRes.setResult(res);
-//            hotelRoomDetailRes.setCode(NO_RESULT_CODE);
-//            hotelRoomDetailRes.setMessage(NO_RESULT_MASSAGE);
-//        }
-//        return hotelRoomDetailRes;
-        return null;
+    public HistoryOrderPackageDetailRes getBookingHistoryDetail(HistoryOrderPackageDetailReq req) {
+        HistoryOrderPackageDetail res = webclientService.retRequestWithEndpoint(domainUrl + BOOKING_DETAIL_URL)
+                .post()
+                .body(Mono.just(req), HistoryOrderPackageDetailReq.class)
+                .retrieve()
+                .bodyToMono(HistoryOrderPackageDetail.class)
+                .block();
+        Gson gson = new Gson();
+        String listResult = gson.toJson(res);
+        log.info("HistoryOrderPackageDetailRes: " + listResult);
+        HistoryOrderPackageDetailRes historyOrderPackageListRes = new HistoryOrderPackageDetailRes();
+        if (res != null) {
+            historyOrderPackageListRes.setResult(res);
+            historyOrderPackageListRes.setCode(SUCCESS_CODE);
+            historyOrderPackageListRes.setMessage(PACKAGE_DETAIL_SUCCESS);
+        } else {
+            historyOrderPackageListRes.setCode(NO_RESULT_CODE);
+            historyOrderPackageListRes.setMessage(NO_RESULT_MASSAGE);
+        }
+        return historyOrderPackageListRes;
     }
 
     @Override

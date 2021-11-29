@@ -7,9 +7,6 @@ import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCNRes;
 import com.flocash.flotravel.demo.dto.packages.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 
-import java.util.List;
-import java.util.Map;
-
 public interface FlotravelDemoService {
     DestinationRes destinationSearch(String keyword);
     DestinationRes destinationElasticSearch(String keyword);
@@ -22,8 +19,8 @@ public interface FlotravelDemoService {
 
     CancelOrderPackageRes cancelBooking(RefundParameter req);
 
-    Map<String, List<HistoryOrderPackageListRes>> getBookingList(HistoryOrderPackageListReq req);
-    HistoryOrderPackageDetailRes getBookingDetail(HistoryOrderPackageDetailReq req);
+    HistoryOrderPackageListRes getBookingHistoryList(HistoryOrderPackageListReq req);
+    HistoryOrderPackageDetailRes getBookingHistoryDetail(HistoryOrderPackageDetailReq req);
 
     void deleteBookingRecord(String packageBookingId);
 }

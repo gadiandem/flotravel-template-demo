@@ -6,7 +6,6 @@ import com.flocash.flotravel.demo.dto.flocash.vcn.response.FlocashVCNRes;
 import com.flocash.flotravel.demo.dto.packages.*;
 import com.flocash.flotravel.demo.dto.search.destination.DestinationRes;
 import com.flocash.flotravel.demo.service.FlotravelDemoService;
-import com.flocash.flotravel.demo.service.WebClientService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDate;
 
 import static com.flocash.flotravel.demo.constant.Constant.SUCCESS_CODE;
+import static com.flocash.flotravel.demo.constant.FlotravelConstant.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -23,18 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DemoApplicationTests {
 
     private FlotravelDemoService flotravelDemoService;
-    private WebClientService webclientService;
+    private String accountId = ACCOUNT_ID;
 
     @Autowired
     public void setFlotravelDemoService(FlotravelDemoService flotravelDemoService) {
         this.flotravelDemoService = flotravelDemoService;
     }
-
-    @Autowired
-    public void setWebclientService(WebClientService webclientService) {
-        this.webclientService = webclientService;
-    }
-
     @Test
     void contextLoads() {
     }
@@ -107,10 +101,8 @@ class DemoApplicationTests {
         Gson gson = new Gson();
         SummaryPackageReq req = gson.fromJson(data, SummaryPackageReq.class);
         SummaryPackageRes summary = flotravelDemoService.getSummary(req);
-//		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
-        assertThat(summary).isNotNull();
+		assertThat(summary.getCode()).isEqualTo(SUCCESS_CODE);
     }
-
 
     @Test
     void testRequestVcn() {
@@ -128,8 +120,7 @@ class DemoApplicationTests {
         Gson gson = new Gson();
         VcnRequest req = gson.fromJson(data, VcnRequest.class);
         FlocashVCNRes requestVcn = flotravelDemoService.requestVcn(req);
-//		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
-        assertThat(requestVcn).isNotNull();
+		assertThat(requestVcn.getCode()).isEqualTo(SUCCESS_CODE);
     }
 
     @Test
@@ -177,8 +168,7 @@ class DemoApplicationTests {
         Gson gson = new Gson();
         OrderPackageReq req = gson.fromJson(data, OrderPackageReq.class);
         CreateOrderPackageRes createOrderPackageRes = flotravelDemoService.createOrder(req);
-//		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
-        assertThat(createOrderPackageRes).isNotNull();
+		assertThat(createOrderPackageRes.getCode()).isEqualTo(SUCCESS_CODE);
     }
 
     @Test
@@ -190,7 +180,23 @@ class DemoApplicationTests {
         Gson gson = new Gson();
         RefundParameter req = gson.fromJson(data, RefundParameter.class);
         CancelOrderPackageRes cancelOrderPackageRes = flotravelDemoService.cancelBooking(req);
-//		assertThat(optionalList.getCode()).isEqualTo(SUCCESS_CODE);
-        assertThat(cancelOrderPackageRes).isNotNull();
+		assertThat(cancelOrderPackageRes.getCode()).isEqualTo(SUCCESS_CODE);
+//        assertThat(cancelOrderPackageRes).isNotNull();
+    }
+
+    @Test
+    void testGetBookingHistory() {
+        HistoryOrderPackageListReq req = new HistoryOrderPackageListReq();
+        req.setUserId(accountId);
+        HistoryOrderPackageListRes bookingHistoryList = flotravelDemoService.getBookingHistoryList(req);
+        assertThat(bookingHistoryList.getCode()).isEqualTo(SUCCESS_CODE);
+    }
+
+    @Test
+    void testGetBookingHistoryDetail() {
+        HistoryOrderPackageDetailReq req = new HistoryOrderPackageDetailReq();
+        req.setPackageOrderId("61a3d4c0e944c545bd5cd6b2");
+        HistoryOrderPackageDetailRes bookingHistoryDetail = flotravelDemoService.getBookingHistoryDetail(req);
+        assertThat(bookingHistoryDetail.getCode()).isEqualTo(SUCCESS_CODE);
     }
 }
