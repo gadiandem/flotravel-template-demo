@@ -154,6 +154,9 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
                 .bodyToFlux(PackageShoppingItem.class)
                 .collectList().block();
         Gson gson = new Gson();
+        if(res == null){
+            res = Collections.emptyList();
+        }
         String listResult = gson.toJson(res.size());
         log.info("Shopping Package: " + listResult + " item");
         PackageShoppingRes packageShoppingRes = new PackageShoppingRes();
@@ -179,6 +182,9 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
                 .bodyToFlux(HotelRoomDetailItem.class)
                 .collectList().block();
         Gson gson = new Gson();
+        if(res == null){
+            res = Collections.emptyList();
+        }
         String listResult = gson.toJson(res.size());
         log.info("Shopping Package: " + listResult + " item");
         HotelRoomDetailRes hotelRoomDetailRes = new HotelRoomDetailRes();
