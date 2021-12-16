@@ -34,13 +34,6 @@ public class FlotravelDemoServiceImp implements FlotravelDemoService {
     private String env;
     private String domainUrl;
     private WebClientService webclientService;
-//    private PackageProviderService providerService;
-//    private SummaryPackageMapper summaryPackageMapper;
-//    private SummaryPackageCacheService summaryPackageCacheService;
-//    private FlocashVCNService flocashVCNService;
-//    private FlocashCreditCardService flocashCreditCardService;
-//    private ModelMapper modelMapper;
-
 
     @Autowired
     public void setWebclientService(WebClientService webclientService) {
